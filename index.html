@@ -1,0 +1,340 @@
+Dưới đây là một website đơn giản để **soạn, lưu, sao chép và tải xuống kịch bản dạng văn bản**. Mình hiểu “tạo script” là tạo nội dung kịch bản, không phải chạy mã lệnh. Lưu thành `index.html` rồi mở bằng trình duyệt.
+
+```html name=index.html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Script Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #121a2e;
+      --muted: #9aa8c7;
+      --text: #eef2ff;
+      --accent: #8b7cff;
+      --border: #283452;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at top left, #22224b 0, transparent 38%),
+        var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    header, main, footer {
+      width: min(1120px, calc(100% - 32px));
+      margin-inline: auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+    }
+
+    .brand { font-weight: 800; font-size: 1.2rem; }
+    .brand span { color: var(--accent); }
+
+    .hero { padding: 34px 0 24px; }
+    .hero h1 { margin: 0 0 8px; font-size: clamp(2rem, 5vw, 3.2rem); }
+    .hero p, .hint { color: var(--muted); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 18px 50px #0003;
+    }
+
+    label {
+      display: block;
+      margin: 0 0 7px;
+      font-weight: 650;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      color: var(--text);
+      background: #0c1325;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 13px;
+      font: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    textarea {
+      min-height: 300px;
+      resize: vertical;
+      line-height: 1.65;
+    }
+
+    .field { margin-bottom: 17px; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 15px;
+      color: white;
+      background: #283452;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { filter: brightness(1.15); }
+    button.primary { background: var(--accent); }
+    button.danger { background: #512b43; }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      color: var(--muted);
+      font-size: .9rem;
+      margin-top: 10px;
+    }
+
+    .saved-list { display: grid; gap: 10px; }
+    .saved-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .saved-item button {
+      padding: 7px 10px;
+      font-size: .85rem;
+    }
+
+    .empty { color: var(--muted); font-size: .92rem; }
+    footer { padding: 24px 0 34px; color: var(--muted); font-size: .9rem; }
+
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      header { padding-block: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">✦ Script<span>Studio</span></div>
+    <span class="hint">Không cần đăng ký</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Ý tưởng thành kịch bản.</h1>
+      <p>Soạn nội dung, lưu ngay trên trình duyệt và tải kịch bản về máy.</p>
+    </section>
+
+    <div class="layout">
+      <section class="panel" aria-labelledby="editor-heading">
+        <h2 id="editor-heading">Tạo script mới</h2>
+
+        <div class="field">
+          <label for="title">Tên script</label>
+          <input id="title" type="text" placeholder="Ví dụ: Video giới thiệu sản phẩm" />
+        </div>
+
+        <div class="field">
+          <label for="category">Loại nội dung</label>
+          <select id="category">
+            <option>Video</option>
+            <option>Podcast</option>
+            <option>Phim ngắn</option>
+            <option>Thuyết trình</option>
+            <option>Khác</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="content">Nội dung</label>
+          <textarea id="content" placeholder="Viết ý tưởng hoặc kịch bản của bạn ở đây..."></textarea>
+          <div class="stats">
+            <span id="word-count">0 từ</span>
+            <span id="char-count">0 ký tự</span>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button class="primary" id="save-btn">Lưu script</button>
+          <button id="copy-btn">Sao chép</button>
+          <button id="download-btn">Tải .txt</button>
+          <button class="danger" id="clear-btn">Xóa nội dung</button>
+        </div>
+        <p class="hint" id="message" role="status" aria-live="polite"></p>
+      </section>
+
+      <aside class="panel">
+        <h2>Script đã lưu</h2>
+        <div class="saved-list" id="saved-list"></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    Dữ liệu được lưu cục bộ trong trình duyệt trên thiết bị này.
+  </footer>
+
+  <script>
+    const titleInput = document.querySelector("#title");
+    const categoryInput = document.querySelector("#category");
+    const contentInput = document.querySelector("#content");
+    const message = document.querySelector("#message");
+    const savedList = document.querySelector("#saved-list");
+
+    const STORAGE_KEY = "script-studio-items";
+
+    function getScripts() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function updateStats() {
+      const text = contentInput.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      document.querySelector("#word-count").textContent = `${words} từ`;
+      document.querySelector("#char-count").textContent =
+        `${contentInput.value.length} ký tự`;
+    }
+
+    function showMessage(text) {
+      message.textContent = text;
+      window.setTimeout(() => {
+        if (message.textContent === text) message.textContent = "";
+      }, 2500);
+    }
+
+    function renderScripts() {
+      const scripts = getScripts();
+      savedList.replaceChildren();
+
+      if (!scripts.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "Chưa có script nào được lưu.";
+        savedList.append(empty);
+        return;
+      }
+
+      scripts.forEach((script, index) => {
+        const row = document.createElement("div");
+        row.className = "saved-item";
+
+        const name = document.createElement("span");
+        name.textContent = script.title || "Script chưa đặt tên";
+
+        const loadButton = document.createElement("button");
+        loadButton.type = "button";
+        loadButton.textContent = "Mở";
+        loadButton.addEventListener("click", () => {
+          titleInput.value = script.title;
+          categoryInput.value = script.category;
+          contentInput.value = script.content;
+          updateStats();
+          showMessage("Đã mở script.");
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Xóa";
+        deleteButton.addEventListener("click", () => {
+          const updated = getScripts().filter((_, itemIndex) => itemIndex !== index);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          renderScripts();
+          showMessage("Đã xóa script.");
+        });
+
+        row.append(name, loadButton, deleteButton);
+        savedList.append(row);
+      });
+    }
+
+    document.querySelector("#save-btn").addEventListener("click", () => {
+      const script = {
+        title: titleInput.value.trim() || "Script chưa đặt tên",
+        category: categoryInput.value,
+        content: contentInput.value,
+        updatedAt: new Date().toISOString()
+      };
+
+      const scripts = getScripts();
+      scripts.unshift(script);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+      renderScripts();
+      showMessage("Đã lưu script trên trình duyệt.");
+    });
+
+    document.querySelector("#copy-btn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(contentInput.value);
+        showMessage("Đã sao chép nội dung.");
+      } catch {
+        showMessage("Không thể sao chép. Hãy kiểm tra quyền clipboard của trình duyệt.");
+      }
+    });
+
+    document.querySelector("#download-btn").addEventListener("click", () => {
+      const title = titleInput.value.trim() || "script";
+      const text = `${title}\nLoại: ${categoryInput.value}\n\n${contentInput.value}`;
+      const file = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${title.replace(/[\\/:*?"<>|]/g, "-")}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.querySelector("#clear-btn").addEventListener("click", () => {
+      titleInput.value = "";
+      contentInput.value = "";
+      updateStats();
+      showMessage("Đã xóa nội dung đang soạn.");
+    });
+
+    contentInput.addEventListener("input", updateStats);
+    renderScripts();
+    updateStats();
+  </script>
+</body>
+</html>
+```
+
+Các script được lưu trong `localStorage` của trình duyệt, nên chỉ có trên thiết bị/trình duyệt hiện tại.
